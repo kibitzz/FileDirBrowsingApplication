@@ -1,0 +1,59 @@
+﻿bankingApp.controller('depositController', function ($scope, API) {
+    $scope.depositQuery = function () {
+        $scope.queryStatus = true;
+        API.deposit($scope.amount)
+        .success(function (data, status) {
+            $scope.success = true;
+            $scope.balance = data.Obj;
+            $scope.queryStatus = false;
+        })
+        .error(function (data, status) {
+            $scope.error = data.Message;
+            $scope.queryStatus = false;
+        });
+    };
+
+});
+
+bankingApp.controller('withdrawController', function ($scope, API) {
+    $scope.withdrawQuery = function () {
+        $scope.queryStatus = true;
+        API.withdraw($scope.amount)
+        .success(function (data, status) {
+            $scope.success = true;
+            $scope.balance = data.Obj;
+            $scope.queryStatus = false;
+        })
+        .error(function (data, status) {
+            $scope.success = false;
+            $scope.error = data.Message;
+            $scope.queryStatus = false;
+        });
+    };
+});
+
+bankingApp.controller('transferController', function ($scope, API) {
+    API.users()
+        .success(function (data, status) {
+            $scope.users = data.Obj;
+            $scope.userLoaded = true;
+        })
+        .error(function (data, status) {
+            $scope.userLoaded = true;
+            $scope.error = data.Message;
+        });
+
+    $scope.withdrawQuery = function () {
+        $scope.queryStatus = true;
+        API.transfer($scope.user, $scope.amount)
+        .success(function (data, status) {
+            $scope.queryStatus = false;
+            $scope.success = true;
+            $scope.balance = data.Obj;
+        })
+        .error(function (data, status) {
+            $scope.queryStatus = false;
+            $scope.error = data.Message;
+        });
+    };
+});

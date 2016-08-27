@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileExplorerApp.Web", "FileExplorerApp.Web\FileExplorerApp.Web.csproj", "{32B58EF3-527A-43E7-9234-AA73057D1F76}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileExplorerApp.FsRepository", "FsRepository\FileExplorerApp.FsRepository.csproj", "{94B21286-10A2-4779-99A0-CAFCF9A89AB0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileExplorerApp.Common", "FileExplorerApp.Common\FileExplorerApp.Common.csproj", "{661A7C80-5536-4653-AF75-F6F3A46FE521}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileExplorerApp.Core", "FileExplorerApp.Core\FileExplorerApp.Core.csproj", "{27E39C9C-8CB8-4B3C-AC6E-F91832D36FB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileExplorerApp.Entities", "FileExplorerApp.Entities\FileExplorerApp.Entities.csproj", "{845E81DC-B5AF-4740-9DB0-9A045FE75C04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileExplorerApp.ViewModels", "FileExplorerApp.ViewModels\FileExplorerApp.ViewModels.csproj", "{B29C96A9-A804-4C89-8788-C8790E516B2E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32B58EF3-527A-43E7-9234-AA73057D1F76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32B58EF3-527A-43E7-9234-AA73057D1F76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32B58EF3-527A-43E7-9234-AA73057D1F76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32B58EF3-527A-43E7-9234-AA73057D1F76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94B21286-10A2-4779-99A0-CAFCF9A89AB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94B21286-10A2-4779-99A0-CAFCF9A89AB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94B21286-10A2-4779-99A0-CAFCF9A89AB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94B21286-10A2-4779-99A0-CAFCF9A89AB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{661A7C80-5536-4653-AF75-F6F3A46FE521}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{661A7C80-5536-4653-AF75-F6F3A46FE521}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{661A7C80-5536-4653-AF75-F6F3A46FE521}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{661A7C80-5536-4653-AF75-F6F3A46FE521}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27E39C9C-8CB8-4B3C-AC6E-F91832D36FB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27E39C9C-8CB8-4B3C-AC6E-F91832D36FB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27E39C9C-8CB8-4B3C-AC6E-F91832D36FB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27E39C9C-8CB8-4B3C-AC6E-F91832D36FB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{845E81DC-B5AF-4740-9DB0-9A045FE75C04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{845E81DC-B5AF-4740-9DB0-9A045FE75C04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{845E81DC-B5AF-4740-9DB0-9A045FE75C04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{845E81DC-B5AF-4740-9DB0-9A045FE75C04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B29C96A9-A804-4C89-8788-C8790E516B2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B29C96A9-A804-4C89-8788-C8790E516B2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B29C96A9-A804-4C89-8788-C8790E516B2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B29C96A9-A804-4C89-8788-C8790E516B2E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

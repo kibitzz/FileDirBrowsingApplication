@@ -1,0 +1,70 @@
+﻿using FileExplorerApp.Common.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web;
+using System.Web.Http;
+//using System.Web.Http.Cors;
+using FileExplorerApp.Common;
+using FileExplorerApp.Core;
+using FileExplorerApp.Repository;
+using FileExplorerApp.Core.Services;
+using FileExplorerApp.ViewModels;
+
+namespace FileExplorerApp.Web.Areas.v1
+{
+   
+    //[EnableCors(origins: "http://fiddle.jshell.net", headers: "*", methods: "*")]
+    public class DirectoryBrowserController : ApiController
+    {        
+        private readonly IDirectoryBrowserService _directoryBrowserService;
+
+        public DirectoryBrowserController(IDirectoryBrowserService directoryBrowserService)
+        {
+            _directoryBrowserService = directoryBrowserService;            
+        }   
+
+        [Route("~/api/v1/Content/Get"), HttpPost]
+        public HttpResponseMessage Get(PathContentRequestModel model)
+        {
+            if (model == null)
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "Model is not valid");
+        
+            if(string.IsNullOrWhiteSpace(model.FullPath))
+            {
+                model.FullPath = "root";
+            }
+
+            var result = _directoryBrowserService.GetDirContent(model);
+
+            if (result.Status == RequestResultStatus.Success)
+            {
+                return Request.CreateResponse(HttpStatusCode.OK, result);
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, result);
+            }
+        }
+
+        [Route("~/api/v1/Content/GetStat"), HttpPost]
+        public HttpResponseMessage GetStat(PathContentRequestModel model)
+        {
+            if (model == null || string.IsNullOrWhiteSpace(model.FullPath))
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "Model is not valid");
+          
+            var result = _directoryBrowserService.GetDirStatistics(model.FullPath);
+
+            if (result.Status == RequestResultStatus.Success)
+            {
+                return Request.CreateResponse(HttpStatusCode.OK, result);
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, result);
+            }
+        }
+    }
+}

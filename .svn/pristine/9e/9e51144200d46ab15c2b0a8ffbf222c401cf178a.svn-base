@@ -1,0 +1,284 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FileExplorerApp.Common.Models;
+using FileExplorerApp.ViewModels;
+using FileExplorerApp.Repository;
+using FileExplorerApp.Entities;
+
+namespace FileExplorerApp.Core.Services.Impl
+{
+    public class DirectoryBrowserService : IDirectoryBrowserService
+    {
+
+        private readonly IFileSystem _worker;
+
+        public string currentPath;
+
+        //Do not change UncompletedRecursions in unlocked section
+        public static object locker = new object();
+
+        static List<StatisticTaskExecPoint> _uncompletedRecursions;
+        public static List<StatisticTaskExecPoint> UncompletedRecursions
+        {
+            get
+            {
+                if (_uncompletedRecursions == null)
+                {
+                    _uncompletedRecursions = new List<StatisticTaskExecPoint>(200);
+                }
+                LastUseOfUncompRecursions = DateTime.Now;
+                return _uncompletedRecursions;
+            }
+        }
+
+        static DateTime LastUseOfUncompRecursions;
+
+        DateTime StartOfRecursion;
+
+        StatisticTaskExecPoint CurrentThreadExecPoint;
+
+        public DirectoryBrowserService(IFileSystem worker)
+        {
+            _worker = worker;
+
+            //clear list from outdated items 
+            if (_uncompletedRecursions != null
+                && (DateTime.Now - LastUseOfUncompRecursions).Minutes > 1)
+            {
+                _uncompletedRecursions.Clear();
+            }
+        }
+
+        public RequestResult<List<DirectoryItem>> GetDirContent(PathContentRequestModel request)
+        {
+
+            string path = request.FullPath;
+            path = path.TrimEnd(((char)92));
+            //currentPath used to form fullPath property in FileDirToDirectoryItem convertor
+            currentPath = path.Replace("root", "");
+            currentPath +=  (string.IsNullOrWhiteSpace(currentPath) ? "" : @"\");
+
+            if (path.EndsWith(":"))
+            {
+                path += @"\";
+            }
+
+            if (!_worker.PathExists(path))
+            {
+                return new RequestResult<List<DirectoryItem>>(RequestResultStatus.Error, null, "Such directory does not exist");
+            }
+
+            List<DirectoryItem> items = new List<DirectoryItem>();           
+            DirectoryItem parentDirItem = new DirectoryItem();
+            parentDirItem.FullPath = _worker.GetParentDirectory(path);
+            parentDirItem.Name = "...";
+            parentDirItem.isDir = true;
+            if (!string.IsNullOrWhiteSpace(parentDirItem.FullPath))
+            {
+                items.Add(parentDirItem);
+            }
+
+            try
+            {
+                items.AddRange(_worker.GetDirectorySubDirs(path).ConvertAll(new Converter<FileDir, DirectoryItem>(FileDirToDirectoryItem)));
+                items.AddRange(_worker.GetDirectoryFiles(path).ConvertAll(new Converter<FileDir, DirectoryItem>(FileDirToDirectoryItem)));
+            } catch (UnauthorizedAccessException)
+            {
+                return new RequestResult<List<DirectoryItem>>(RequestResultStatus.Error, items, "You have no access to this directory");
+            }
+
+            return new RequestResult<List<DirectoryItem>>(RequestResultStatus.Success, items, "worker instance " + _worker.instanceIdx.ToString());
+        }
+
+        public DirectoryItem FileDirToDirectoryItem(FileDir pf)
+        {
+            DirectoryItem rez = new DirectoryItem();
+            rez.Name = pf.Name;
+            rez.isDir = pf.isDir;
+            rez.FullPath = currentPath + pf.Name;
+            return rez;
+        }
+
+        public RequestResult<DirectoryStat> GetDirStatistics(PathStatisticRequestModel model)
+        {
+            string path = model.FullPath;
+            if (!_worker.PathExists(path))
+            {
+                return new RequestResult<DirectoryStat>(RequestResultStatus.Error, null, "Such directory does not exist");
+            }
+
+            path = path.TrimEnd(((char)92));
+            currentPath = path;          
+            if (path.EndsWith(":"))
+            {
+                path += @"\";
+            }
+
+            StartOfRecursion = DateTime.Now;
+            DirectoryStat ds = new DirectoryStat();
+            ds.isComplete = true;
+            ds.FullPath = path;
+
+
+            if (!string.IsNullOrWhiteSpace(model.Cursor))
+            {
+                int tmp;
+                if (int.TryParse(model.Cursor, out tmp) && UncompletedRecursions.Count > tmp)
+                {
+                    CurrentThreadExecPoint = UncompletedRecursions[tmp];
+                    // previous results will be considered in further enum               
+                    ds = CurrentThreadExecPoint.DirectoryStat;
+                    ds.isComplete = true;
+                }              
+                            
+                //continue enumeration
+                if (CurrentThreadExecPoint != null && 
+                    CurrentThreadExecPoint.Id == tmp && ds.FullPath == path)
+                {
+                    //points collection will change(remove processed items), 
+                    //so we fix initial collection in array
+                    string[] arr = CurrentThreadExecPoint.Points.ToArray();
+                    
+                    foreach (string pth in arr)
+                    {
+                        GetDirStatistics(pth, ds);
+                    }
+                }else
+                {
+                   
+                    return new RequestResult<DirectoryStat>(RequestResultStatus.Error, null, "Can not find proper cursor state object ");
+                }
+
+            }
+            else
+            {
+                GetDirStatistics(path, ds);
+            }          
+           
+            return new RequestResult<DirectoryStat>(RequestResultStatus.Success, ds, "worker instance " + _worker.instanceIdx.ToString());
+        }
+
+        public void GetDirStatisticszzz(string path, DirectoryStat ds)
+        {
+            string contextPath = currentPath;
+            long mega = 1048576;         
+            try
+            {
+                List<FileDir> files = _worker.GetDirectoryFiles(path);
+                ds.Less10mb += EnumFileDirByCriteria(files, 0, 10 * mega);
+                ds.Range10_50mb += EnumFileDirByCriteria(files, 10 * mega, 50 * mega);
+                ds.More100mb += EnumFileDirByCriteria(files, 100 * mega, long.MaxValue);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                ds.Info += "| Inaccessible [" + path + "]";
+                return;
+            }
+
+            if (contextPath != currentPath)
+            { ds.FullPath += " ### break"; return; }
+
+            List<FileDir> subd = _worker.GetDirectorySubDirs(path);
+            foreach (FileDir d in subd)
+            {
+                if (contextPath != currentPath)
+                {
+                    ds.FullPath += " ### break";
+                    break;
+                }
+                GetDirStatistics(path + @"\" + d.Name, ds);
+            }
+                      
+        }
+
+        public void GetDirStatistics(string path, DirectoryStat ds)
+        {
+            // control max time for thread execution and create stop/start point
+            CheckExecTime(path, ds);
+
+            // if current thread exceed limit of time its result state became NOT Complete
+            // and if so, all pending subdirectories moved to ThreadExecPoint list
+            // to continue in another thread (if service client ask for)        
+            if (!ds.isComplete)
+            {              
+                CurrentThreadExecPoint.Points.Add(path);
+                return;
+            }
+         
+            long mega = 1048576;
+            try
+            {
+                List<FileDir> files = _worker.GetDirectoryFiles(path);
+                ds.Less10mb += EnumFileDirByCriteria(files, 0, 10 * mega);
+                ds.Range10_50mb += EnumFileDirByCriteria(files, 10 * mega, 50 * mega);
+                ds.More100mb += EnumFileDirByCriteria(files, 100 * mega, long.MaxValue);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                ds.Info += "| Inaccessible [" + path + "]";
+                return;
+            }
+                               
+            List<FileDir> subd = _worker.GetDirectorySubDirs(path);
+            foreach (FileDir d in subd)
+            {                
+                GetDirStatistics(path + @"\" + d.Name, ds);
+            }
+
+        }
+       
+        public void CheckExecTime(string path, DirectoryStat ds)
+        {
+            //remove directory from ThreadExecPoint's because it is ready (again) to enum
+            if (CurrentThreadExecPoint != null)
+            {
+                CurrentThreadExecPoint.Points.Remove(path);
+            }
+
+            if (!ds.isComplete)
+            {               
+                return;
+            }
+
+            if ((DateTime.Now - StartOfRecursion).Seconds >= 1)
+            {
+
+                // other task threads wait to change UncompletedRecursions
+                lock (locker)
+                {
+                    ds.isComplete = false;
+
+                    if (CurrentThreadExecPoint == null)
+                    {
+                        CurrentThreadExecPoint = new StatisticTaskExecPoint();
+                        CurrentThreadExecPoint.DirectoryStat = ds;
+                     
+                        ds.ContinueCursor = UncompletedRecursions.Count;
+                        CurrentThreadExecPoint.Id = ds.ContinueCursor;
+                        UncompletedRecursions.Add(CurrentThreadExecPoint);
+
+                    }
+                }
+            }
+        }
+
+        public int EnumFileDirByCriteria(List<FileDir> files, long greater, long less)
+        {
+            int rez = 0;
+
+            foreach (FileDir f in files)
+            {             
+                if (f.Length > greater && f.Length < less)
+                {
+                    rez++;
+                }
+            }
+
+            return rez;
+        }
+
+    }
+}

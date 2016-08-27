@@ -1,0 +1,30 @@
+﻿fileBrowserApp.controller('mainController', function ($scope, API) {
+    $scope.CurrPath = "";
+});
+
+fileBrowserApp.controller('contentController', function ($scope, API) {
+    $scope.CurrPath = "C:\\projects\\WebApplication1\\";
+    var ccursor ="";
+    API.loadcontent($scope.CurrPath)
+        .success(function (data, status) {
+            $scope.diritems = data.Obj;
+            console.log(data);
+            $scope.contentLoaded = true;
+        })
+        .error(function (data, status) {
+            $scope.contentLoaded = true;
+            $scope.error = data.Message;
+        });
+
+    API.loadstat($scope.CurrPath, ccursor)
+       .success(function (data, status) {         
+           $scope.statLoaded = true;
+           $scope.filescou10 = data.Obj.Less10mb;
+       })
+       .error(function (data, status) {
+           $scope.statLoaded = true;
+           $scope.error = data.Message;
+       });
+
+});
+

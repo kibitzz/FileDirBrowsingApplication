@@ -1,0 +1,19 @@
+﻿<div class="row">
+    <div class="col-xs-12">
+        <h1>Statement of transactions <span id="contentLoaded" ng-hide="contentLoaded" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span></h1>
+        <div ng-show="error" class="alert alert-danger">{{error}}</div>
+    </div>
+</div>
+<div ng-hide="diritems.length || !contentLoaded" id="emptyStatement">Content will be here</div>
+<table ng-show="diritems.length" class="table table-bordered">
+    <tr>
+        <th>name</th>
+        <th>full path</th>
+    </tr>
+    <tr ng-repeat="x in diritems">
+        <td>{{ $index + 1 }}</td>
+        <td>{{ x.Name }}</td>
+        <td>{{ x.FullPath }}</td>
+    </tr>
+   
+</table>

@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<!-- define angular app -->
+<html ng-app="fileBrowserApp">
+<head>
+    <!-- SCROLLS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" />
+    @*<link rel="stylesheet" href="~/Views/Home/css/.css">*@
+    <link rel="stylesheet" href="@Url.Content("~/assets/css/style.css")">
+    <!-- SPELLS -->
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-cookies.js"></script>
+    <script src="@Url.Content("~/assets/js/app.js")"></script>
+    <script src="@Url.Content("~/assets/js/services.js")"></script>
+    <script src="@Url.Content("~/assets/js/controllers.js")"></script>
+</head>
+<!-- define angular controller -->
+<body ng-controller="contentController" ng-cloak>
+
+ <table align="center" border="1" width="600" cellpadding="12">
+        <tr bgcolor="#E1E4F7">
+            <td>
+                <div>
+                    <table bgcolor="#E1E4F7" ng-show="diritems.length" class="table table-bordered">
+                        <tr>
+                            <th>less 10Mb</th>
+                            <th>10Mb-50Mb</th>
+                            <th>more 100Mb</th>
+                        </tr>
+                        <tr>
+                            <td>{{ statistics.Less10mb }}<u ng-hide="statComplete">+ still processing</u></td>
+                            <td>{{ statistics.Range10_50mb }}<u ng-hide="statLoaded"> loading</u></td>
+                            <td>{{ statistics.More100mb }}</td>
+                        </tr>
+
+                    </table>
+                </div>
+
+                <div>
+                    Current path: {{CurrPath +"     "+error}}
+                </div>
+            </td>
+
+       </tr>
+        <tr>
+            <td>
+                <div id="main">
+                    <div ng-hide="diritems.length || !contentLoaded" id="emptyStatement">Content will be here</div>
+
+                    <div ng-repeat="item in diritems">
+                        <a ng-click="ChangeDir(item)">{{item.Name}}</a>
+                    </div>
+                </div>
+            </td>
+         </tr>
+</table>
+</body>
+</html>

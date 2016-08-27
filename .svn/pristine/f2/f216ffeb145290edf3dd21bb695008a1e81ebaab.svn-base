@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<!-- define angular app -->
+<html ng-app="fileBrowserApp">
+<head>
+    <!-- SCROLLS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" />
+    @*<link rel="stylesheet" href="~/Views/Home/css/.css">*@
+    <link rel="stylesheet" href="@Url.Content("~/assets/css/style.css")">
+    <!-- SPELLS -->
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-cookies.js"></script>
+    <script src="@Url.Content("~/assets/js/app.js")"></script>
+    <script src="@Url.Content("~/assets/js/services.js")"></script>
+    <script src="@Url.Content("~/assets/js/controllers.js")"></script>
+</head>
+<!-- define angular controller -->
+<body ng-controller="contentController" ng-cloak>
+    <nav class="navbar navbar-default">
+       
+        
+        <button ng-click="continueStat()">Click Me!</button>
+
+        <div>
+            Current path: {{CurrPath +" "+Less10mb +" cur "+ccursor}}<br>
+            files: {{ statComplete }}
+            <div ng-hide="statComplete" id="emptyStatement">loading partly requested data</div>
+        </div>
+       
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#/">File Browsing Application</a>
+            </div>
+           
+        </div>
+    </nav>
+    <div id="main">
+        <div ng-hide="diritems.length || !contentLoaded" id="emptyStatement">Content will be here</div>
+        <table ng-show="diritems.length" class="table table-bordered">
+            <tr>
+                <th>index</th>
+                <th>name</th>
+                <th>full path</th>
+            </tr>
+            <tr ng-repeat="x in diritems">
+                <td>{{ $index + 1 }}</td>
+                <td>{{ x.Name }}</td>
+                <td>{{ x.FullPath }}</td>
+            </tr>
+
+        </table>
+    </div>
+    <footer class="text-center"></footer>
+</body>
+</html>

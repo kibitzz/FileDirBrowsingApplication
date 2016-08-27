@@ -1,0 +1,94 @@
+﻿
+fileBrowserApp.controller('contentController', function ($scope, API) {
+    $scope.CurrPath = "";
+   
+    var ccursor = "";
+    var statCmpl = false;
+    API.loadcontent($scope.CurrPath)
+        .success(function (data, status) {
+            $scope.diritems = data.Obj;
+            console.log(data);
+            $scope.contentLoaded = true;
+        })
+        .error(function (data, status) {
+            $scope.contentLoaded = true;
+            $scope.error = data.Message;
+        });
+  
+    API.loadstat($scope.CurrPath, ccursor)
+           .success(function (data, status) {
+               $scope.CurrPath = data.Obj.FullPath;
+               $scope.statLoaded = true;
+               statCmpl = data.Obj.isComplete;
+               $scope.statComplete = data.Obj.isComplete;
+               $scope.statistics = data.Obj;               
+               $scope.ccursor = data.Obj.ContinueCursor;
+               ccursor = data.Obj.ContinueCursor;
+
+               if (!statCmpl) {
+                   $scope.startContinueStat();
+               }
+           })
+           .error(function (data, status) {
+               $scope.statLoaded = true;
+               //$scope.error = data.Message;
+           });
+           
+    $scope.startContinueStat = function () {
+        
+            API.loadstat($scope.CurrPath, ccursor)
+            .success(function (data, status) {
+                // if current path changed - do not continue 
+                if ($scope.CurrPath == data.Obj.FullPath) {
+
+                    $scope.statLoaded = true;
+                    statCmpl = data.Obj.isComplete;
+                    $scope.statComplete = data.Obj.isComplete;
+                    $scope.statistics = data.Obj;
+                    ccursor = data.Obj.ContinueCursor;
+                    $scope.ccursor = data.Obj.ContinueCursor;
+
+                    if (!statCmpl) {
+                        $scope.startContinueStat();
+                    }
+                }
+            })
+            .error(function (data, status) {
+                $scope.queryStatus = false;
+                $scope.error = data.Message;
+            });
+             
+    };
+
+    $scope.ChangeDir = function (item) {
+        if (item.isDir) {
+
+            statCmpl = true;
+            ccursor = "";
+            $scope.error = "";
+            $scope.statistics = null;
+                      
+            $scope.CurrPath = item.FullPath;
+            $scope.statLoaded = false;
+            $scope.statComplete = true;
+
+            API.loadcontent(item.FullPath)
+           .success(function (data, status) {
+               $scope.diritems = data.Obj;
+               console.log(data);
+               $scope.contentLoaded = true;
+           })
+           .error(function (data, status) {
+               $scope.contentLoaded = true;
+               $scope.error = data.Message;
+           });
+
+            
+            $scope.startContinueStat();
+         
+        }
+
+    };
+
+});
+

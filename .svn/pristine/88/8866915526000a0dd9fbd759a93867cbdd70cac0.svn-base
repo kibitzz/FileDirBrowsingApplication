@@ -1,0 +1,100 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using FileExplorerApp.Entities;
+using System.IO;
+
+namespace FsRepository.Repository
+{
+    class FileSystemBrowser : IFileSystem
+    {
+        public static string systemRootAlias = "\\";
+
+        public List<FileDir> GetDirectoryFiles(string dirPath)
+        {           
+            DirectoryInfo d = new DirectoryInfo(dirPath);
+            if (d.Exists)
+            {               
+                FileInfo[] fInf = d.GetFiles();
+                List<FileDir> rez = new List<FileDir>( fInf.Length);
+              
+                foreach (FileInfo f in fInf)
+                {
+                    FileDir fd = new FileDir();
+                    fd.Name = f.Name;
+                    rez.Add(fd);
+                }
+
+                return rez;
+            }
+
+            return new List<FileDir>(); ;
+        }
+
+        public List<FileDir> GetDirectorySubDirs(string dirPath)
+        {           
+            DirectoryInfo d = new DirectoryInfo(dirPath);
+            if (d.Exists)
+            {
+
+                DirectoryInfo[] dirInf = d.GetDirectories();              
+                List<FileDir> rez = new List<FileDir>(dirInf.Length );
+
+                foreach (DirectoryInfo di in dirInf)
+                {
+                    FileDir fd = new FileDir();
+                    fd.Name = di.Name;
+                    fd.isDir = true;
+                    rez.Add(fd);
+                }
+              
+                return rez;
+            }
+
+            if (dirPath == systemRootAlias)
+            {
+                String[] drives = Environment.GetLogicalDrives();
+                List<FileDir> rez = new List<FileDir>(drives.Length);
+                foreach (string di in drives)
+                {
+                    FileDir fd = new FileDir();
+                    fd.Name = di;
+                    fd.isDir = true;
+                    rez.Add(fd);
+                }
+                return rez;
+            }
+
+            return new List<FileDir>();
+
+        }
+
+        public DirectoryStat GetDirectoryStatistic(string dirPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetParentDirectory(string dirPath)
+        {
+            DirectoryInfo d = new DirectoryInfo(dirPath);
+            if (d.Exists)
+            {               
+                return d.Parent.Exists? d.Parent.FullName : systemRootAlias;
+            }
+            return "";
+        }
+
+        public bool PathExists(string dirPath)
+        {
+            DirectoryInfo d = new DirectoryInfo(dirPath);           
+            if (d.Exists || dirPath == systemRootAlias)
+            {
+                return true;
+            }
+
+            return false;           
+        }
+    }
+}
